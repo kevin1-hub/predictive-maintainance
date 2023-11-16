@@ -1,0 +1,56 @@
+import pandas as pd
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# 1. Load the dataset from the Excel file
+df = pd.read_excel('/content/predictivedataset.xlsx')
+df
+
+# 2. Data Preprocessing
+X = df.drop(['Equipment ID', 'Date and Time', 'Failure Label'], axis=1)
+y = df['Failure Label']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 3. Model Initialization and Training
+# Initialize the Gradient Boosting Classifier
+gbt_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+
+# Train the model
+gbt_model.fit(X_train, y_train)
+
+# 4. Model Evaluation
+# Predictions on the test set
+y_pred = gbt_model.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print(f"Confusion Matrix:\n{conf_matrix}")
+print(f"Classification Report:\n{classification_rep}")
+
+# 5. Proactive Maintenance
+# Use the trained model for predicting failures in real-time sensor data
+
+# Example: Generating new sensor data for prediction
+new_sensor_data_for_prediction = pd.DataFrame({
+    'Temperature': [72.0],
+    'Vibration': [0.2],
+    'Pressure': [99],
+    'RPM': [515],
+    'Power Consumption': [33.0]
+})
+
+# Make predictions
+predicted_failure = gbt_model.predict(new_sensor_data_for_prediction)
+
+# Implement proactive maintenance based on the predictions
+if predicted_failure == 1:
+    print("Scheduled maintenance due to predicted failure.")
+else:
+    print("No predicted failure. No maintenance needed.")
